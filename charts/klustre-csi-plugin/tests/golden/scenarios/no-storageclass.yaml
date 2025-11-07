@@ -1,0 +1,4 @@
+storageClass:
+  create: false
+namespace:
+  name: klustre-custom

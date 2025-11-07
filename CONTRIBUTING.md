@@ -8,7 +8,7 @@ Thank you for improving KlustreFS Helm charts! This repo mirrors the contributin
 2. **Conventional Commits** – follow [conventionalcommits.org](https://www.conventionalcommits.org/) (`type(scope): summary`).
 3. **Sign Off** – append a Developer Certificate of Origin sign-off to every commit (`git commit --signoff`).
 4. **Docs & Tests** – update chart READMEs/values when behavior changes; add tests where possible.
-5. **Preflight** – run `make docs lint` locally to ensure CI will pass before opening a PR.
+5. **Preflight** – run `make verify` locally to ensure CI will pass before opening a PR.
 6. **SemVer Awareness** – call out breaking changes in the PR description so we can bump the chart major version when needed.
 
 ## Tagging & Releases
@@ -38,9 +38,14 @@ make deps
 ### Common Tasks
 
 ```bash
-make docs    # regenerate chart README files via helm-docs
-make lint    # run helm lint --strict across charts/
-make package # docs + lint + produce dist/<chart>.tgz
+make docs     # regenerate chart README files via helm-docs
+make lint     # run helm lint --strict across charts/
+make package  # docs + lint + produce dist/<chart>.tgz
+make test     # render-time unit tests via helm-unittest
+make validate # render & schema-validate manifests via kubeconform
+make schema   # build/update values.schema.json via helm-schema
+make golden   # regenerate golden helm template outputs per scenario
+make verify   # docs + lint + tests + validation + schema + golden
 ```
 
 `make docs` must leave the tree clean—commit any generated README changes with your PR.

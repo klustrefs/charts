@@ -1,0 +1,747 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "affinity": {
+      "additionalProperties": false,
+      "required": [],
+      "title": "affinity",
+      "type": "object"
+    },
+    "csiDriver": {
+      "additionalProperties": false,
+      "description": "Cluster-wide CSIDriver object",
+      "properties": {
+        "create": {
+          "default": true,
+          "description": "Whether to install the CSIDriver resource",
+          "required": [],
+          "title": "create",
+          "type": "boolean"
+        },
+        "fsGroupPolicy": {
+          "default": "ReadWriteOnceWithFSType",
+          "required": [],
+          "title": "fsGroupPolicy",
+          "type": "string"
+        },
+        "name": {
+          "default": "lustre.csi.klustrefs.io",
+          "required": [],
+          "title": "name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "create",
+        "name",
+        "fsGroupPolicy"
+      ],
+      "title": "csiDriver",
+      "type": "object"
+    },
+    "extraVolumeMounts": {
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "extraVolumeMounts",
+      "type": "array"
+    },
+    "extraVolumes": {
+      "description": "Extra volumes/mounts appended to the pod spec",
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "extraVolumes",
+      "type": "array"
+    },
+    "fullnameOverride": {
+      "default": "",
+      "required": [],
+      "title": "fullnameOverride",
+      "type": "string"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "image": {
+      "additionalProperties": false,
+      "description": "Container image for the CSI node plugin",
+      "properties": {
+        "pullPolicy": {
+          "default": "IfNotPresent",
+          "required": [],
+          "title": "pullPolicy",
+          "type": "string"
+        },
+        "repository": {
+          "default": "ghcr.io/klustrefs/klustre-csi-plugin",
+          "required": [],
+          "title": "repository",
+          "type": "string"
+        },
+        "tag": {
+          "default": "0.1.1",
+          "required": [],
+          "title": "tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "tag",
+        "pullPolicy"
+      ],
+      "title": "image",
+      "type": "object"
+    },
+    "imagePullSecrets": {
+      "description": "Additional image pull secrets applied to the pod spec",
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "imagePullSecrets",
+      "type": "array"
+    },
+    "nameOverride": {
+      "default": "",
+      "description": "Override default naming behaviour",
+      "required": [],
+      "title": "nameOverride",
+      "type": "string"
+    },
+    "namespace": {
+      "additionalProperties": false,
+      "description": "Namespace configuration for the chart's resources",
+      "properties": {
+        "create": {
+          "default": true,
+          "description": "Create the namespace if it does not already exist",
+          "required": [],
+          "title": "create",
+          "type": "boolean"
+        },
+        "labels": {
+          "additionalProperties": false,
+          "properties": {
+            "pod-security.kubernetes.io/enforce": {
+              "default": "privileged",
+              "description": "Additional labels applied to the namespace",
+              "required": [],
+              "title": "pod-security.kubernetes.io/enforce",
+              "type": "string"
+            }
+          },
+          "required": [
+            "pod-security.kubernetes.io/enforce"
+          ],
+          "title": "labels",
+          "type": "object"
+        },
+        "name": {
+          "default": "klustre-system",
+          "description": "Namespace where the chart's resources are installed",
+          "required": [],
+          "title": "name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "create",
+        "name",
+        "labels"
+      ],
+      "title": "namespace",
+      "type": "object"
+    },
+    "nodePlugin": {
+      "additionalProperties": false,
+      "description": "Node DaemonSet behaviour and helper images",
+      "properties": {
+        "csiEndpoint": {
+          "default": "unix:///var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock",
+          "required": [],
+          "title": "csiEndpoint",
+          "type": "string"
+        },
+        "hostPaths": {
+          "additionalProperties": false,
+          "properties": {
+            "device": {
+              "default": "/dev",
+              "required": [],
+              "title": "device",
+              "type": "string"
+            },
+            "lib": {
+              "default": "/lib",
+              "required": [],
+              "title": "lib",
+              "type": "string"
+            },
+            "lib64": {
+              "default": "/lib64",
+              "required": [],
+              "title": "lib64",
+              "type": "string"
+            },
+            "pods": {
+              "default": "/var/lib/kubelet/pods",
+              "description": "Additional privileged mounts used by the node plugin",
+              "required": [],
+              "title": "pods",
+              "type": "string"
+            },
+            "sbin": {
+              "default": "/sbin",
+              "required": [],
+              "title": "sbin",
+              "type": "string"
+            },
+            "usrSbin": {
+              "default": "/usr/sbin",
+              "required": [],
+              "title": "usrSbin",
+              "type": "string"
+            }
+          },
+          "required": [
+            "pods",
+            "device",
+            "sbin",
+            "usrSbin",
+            "lib",
+            "lib64"
+          ],
+          "title": "hostPaths",
+          "type": "object"
+        },
+        "imagePullSecrets": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "imagePullSecrets",
+          "type": "array"
+        },
+        "kubeletRegistrationPath": {
+          "default": "/var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock",
+          "required": [],
+          "title": "kubeletRegistrationPath",
+          "type": "string"
+        },
+        "ldLibraryPath": {
+          "default": "/host/lib:/host/lib64:/host/usr/lib:/host/usr/lib64",
+          "required": [],
+          "title": "ldLibraryPath",
+          "type": "string"
+        },
+        "logLevel": {
+          "default": "info",
+          "description": "Level passed to --log-level",
+          "required": [],
+          "title": "logLevel",
+          "type": "string"
+        },
+        "pathEnv": {
+          "default": "/host/usr/sbin:/host/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "description": "PATH/LIB vars injected into the privileged container",
+          "required": [],
+          "title": "pathEnv",
+          "type": "string"
+        },
+        "pluginDir": {
+          "default": "/var/lib/kubelet/plugins/lustre.csi.klustrefs.io",
+          "description": "Host path where the CSI Unix socket is created",
+          "required": [],
+          "title": "pluginDir",
+          "type": "string"
+        },
+        "priorityClassName": {
+          "default": "system-node-critical",
+          "description": "Priority class assigned to the DaemonSet pods",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "registrar": {
+          "additionalProperties": false,
+          "properties": {
+            "image": {
+              "additionalProperties": false,
+              "properties": {
+                "pullPolicy": {
+                  "default": "IfNotPresent",
+                  "required": [],
+                  "title": "pullPolicy",
+                  "type": "string"
+                },
+                "repository": {
+                  "default": "registry.k8s.io/sig-storage/csi-node-driver-registrar",
+                  "required": [],
+                  "title": "repository",
+                  "type": "string"
+                },
+                "tag": {
+                  "default": "v2.10.1",
+                  "required": [],
+                  "title": "tag",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repository",
+                "tag",
+                "pullPolicy"
+              ],
+              "title": "image",
+              "type": "object"
+            },
+            "resources": {
+              "additionalProperties": false,
+              "properties": {
+                "limits": {
+                  "additionalProperties": false,
+                  "description": "Scheduler limits for the node-driver-registrar sidecar",
+                  "properties": {
+                    "cpu": {
+                      "default": "200m",
+                      "required": [],
+                      "title": "cpu",
+                      "type": "string"
+                    },
+                    "memory": {
+                      "default": "200Mi",
+                      "required": [],
+                      "title": "memory",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "cpu",
+                    "memory"
+                  ],
+                  "title": "limits",
+                  "type": "object"
+                },
+                "requests": {
+                  "additionalProperties": false,
+                  "description": "Resource requests for the node-driver-registrar sidecar",
+                  "properties": {
+                    "cpu": {
+                      "default": "100m",
+                      "required": [],
+                      "title": "cpu",
+                      "type": "string"
+                    },
+                    "memory": {
+                      "default": "200Mi",
+                      "required": [],
+                      "title": "memory",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "cpu",
+                    "memory"
+                  ],
+                  "title": "requests",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "requests",
+                "limits"
+              ],
+              "title": "resources",
+              "type": "object"
+            }
+          },
+          "required": [
+            "image",
+            "resources"
+          ],
+          "title": "registrar",
+          "type": "object"
+        },
+        "registrationDir": {
+          "default": "/var/lib/kubelet/plugins_registry",
+          "description": "Host path used for node-driver-registrar registration information",
+          "required": [],
+          "title": "registrationDir",
+          "type": "string"
+        },
+        "resources": {
+          "additionalProperties": false,
+          "properties": {
+            "limits": {
+              "additionalProperties": false,
+              "description": "Hard limits enforced by the scheduler for the node plugin",
+              "properties": {
+                "cpu": {
+                  "default": "200m",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "200Mi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "limits",
+              "type": "object"
+            },
+            "requests": {
+              "additionalProperties": false,
+              "description": "Baseline compute/memory reserved for the node plugin container",
+              "properties": {
+                "cpu": {
+                  "default": "50m",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "50Mi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "requests",
+              "type": "object"
+            }
+          },
+          "required": [
+            "requests",
+            "limits"
+          ],
+          "title": "resources",
+          "type": "object"
+        }
+      },
+      "required": [
+        "logLevel",
+        "priorityClassName",
+        "pluginDir",
+        "registrationDir",
+        "kubeletRegistrationPath",
+        "csiEndpoint",
+        "pathEnv",
+        "ldLibraryPath",
+        "imagePullSecrets",
+        "hostPaths",
+        "resources",
+        "registrar"
+      ],
+      "title": "nodePlugin",
+      "type": "object"
+    },
+    "nodeSelector": {
+      "additionalProperties": false,
+      "description": "Static scheduling preferences (in addition to tolerations)",
+      "required": [],
+      "title": "nodeSelector",
+      "type": "object"
+    },
+    "podAnnotations": {
+      "additionalProperties": false,
+      "description": "Extra metadata applied to all pods",
+      "required": [],
+      "title": "podAnnotations",
+      "type": "object"
+    },
+    "podLabels": {
+      "additionalProperties": false,
+      "required": [],
+      "title": "podLabels",
+      "type": "object"
+    },
+    "podSecurityContext": {
+      "additionalProperties": false,
+      "required": [],
+      "title": "podSecurityContext",
+      "type": "object"
+    },
+    "rbac": {
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "default": true,
+          "description": "Toggle creation of ClusterRole/ClusterRoleBinding",
+          "required": [],
+          "title": "create",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "create"
+      ],
+      "title": "rbac",
+      "type": "object"
+    },
+    "securityContext": {
+      "additionalProperties": false,
+      "required": [],
+      "title": "securityContext",
+      "type": "object"
+    },
+    "serviceAccount": {
+      "additionalProperties": false,
+      "description": "Service account and RBAC toggles",
+      "properties": {
+        "annotations": {
+          "additionalProperties": false,
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "create": {
+          "default": true,
+          "description": "Create a dedicated service account",
+          "required": [],
+          "title": "create",
+          "type": "boolean"
+        },
+        "name": {
+          "default": "",
+          "description": "Optional explicit service account name",
+          "required": [],
+          "title": "name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "create",
+        "name",
+        "annotations"
+      ],
+      "title": "serviceAccount",
+      "type": "object"
+    },
+    "settingsConfigMap": {
+      "additionalProperties": false,
+      "description": "Expose operational settings via ConfigMap for operators",
+      "properties": {
+        "create": {
+          "default": true,
+          "required": [],
+          "title": "create",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "create"
+      ],
+      "title": "settingsConfigMap",
+      "type": "object"
+    },
+    "storageClass": {
+      "additionalProperties": false,
+      "description": "Optional static storage class example",
+      "properties": {
+        "allowedTopologies": {
+          "items": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "matchLabelExpressions": {
+                    "items": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "key": {
+                              "default": "lustre.csi.klustrefs.io/lustre-client",
+                              "required": [],
+                              "title": "key",
+                              "type": "string"
+                            },
+                            "values": {
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "required": [],
+                                    "type": "string"
+                                  }
+                                ],
+                                "required": []
+                              },
+                              "required": [],
+                              "title": "values",
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "values"
+                          ],
+                          "type": "object"
+                        }
+                      ],
+                      "required": []
+                    },
+                    "required": [],
+                    "title": "matchLabelExpressions",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "matchLabelExpressions"
+                ],
+                "type": "object"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "allowedTopologies",
+          "type": "array"
+        },
+        "annotations": {
+          "additionalProperties": false,
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "create": {
+          "default": true,
+          "description": "Set to false if you only want the DaemonSet components",
+          "required": [],
+          "title": "create",
+          "type": "boolean"
+        },
+        "mountOptions": {
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              },
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "mountOptions",
+          "type": "array"
+        },
+        "name": {
+          "default": "klustre-csi-static",
+          "required": [],
+          "title": "name",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": false,
+          "required": [],
+          "title": "parameters",
+          "type": "object"
+        },
+        "reclaimPolicy": {
+          "default": "Retain",
+          "required": [],
+          "title": "reclaimPolicy",
+          "type": "string"
+        },
+        "volumeBindingMode": {
+          "default": "WaitForFirstConsumer",
+          "required": [],
+          "title": "volumeBindingMode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "create",
+        "name",
+        "reclaimPolicy",
+        "volumeBindingMode",
+        "mountOptions",
+        "allowedTopologies",
+        "annotations",
+        "parameters"
+      ],
+      "title": "storageClass",
+      "type": "object"
+    },
+    "tolerations": {
+      "description": "Placement controls for the DaemonSet pod",
+      "items": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "operator": {
+                "default": "Exists",
+                "required": [],
+                "title": "operator",
+                "type": "string"
+              }
+            },
+            "required": [
+              "operator"
+            ],
+            "type": "object"
+          }
+        ],
+        "required": []
+      },
+      "required": [],
+      "title": "tolerations",
+      "type": "array"
+    },
+    "topologySpreadConstraints": {
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "topologySpreadConstraints",
+      "type": "array"
+    }
+  },
+  "required": [
+    "nameOverride",
+    "fullnameOverride",
+    "namespace",
+    "image",
+    "nodePlugin",
+    "tolerations",
+    "nodeSelector",
+    "affinity",
+    "topologySpreadConstraints",
+    "podSecurityContext",
+    "securityContext",
+    "podAnnotations",
+    "podLabels",
+    "imagePullSecrets",
+    "extraVolumes",
+    "extraVolumeMounts",
+    "serviceAccount",
+    "rbac",
+    "csiDriver",
+    "storageClass",
+    "settingsConfigMap"
+  ],
+  "type": "object"
+}

@@ -67,7 +67,7 @@ Each chart directory contains its own README and default values. Run `helm show 
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for build/lint instructions, container image workflows, command-line argument reference, and contribution guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for build/lint instructions, helm-unittest guidance, schema validation notes (via [`helm-schema`](https://github.com/dadav/helm-schema)), golden render generation, container image workflows, command-line argument reference, and contribution guidelines. Run `make verify` (docs + lint + tests + validate + schema + golden) locally before opening a PR.
 
 ## License
 

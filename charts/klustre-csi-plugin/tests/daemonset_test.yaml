@@ -1,0 +1,58 @@
+suite: DaemonSet
+templates:
+  - templates/daemonset.yaml
+tests:
+  - it: renders node daemonset with expected defaults
+    release:
+      name: klustre
+    asserts:
+      - equal:
+          path: metadata.name
+          value: klustre-klustre-csi-plugin-node
+      - equal:
+          path: metadata.namespace
+          value: klustre-system
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/klustrefs/klustre-csi-plugin:0.1.1
+      - equal:
+          path: spec.template.spec.containers[0].env[1].value
+          value: unix:///var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: klustre-klustre-csi-plugin
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/component"]
+          value: node
+
+  - it: merges global and node imagePullSecrets
+    values:
+      - fixtures/pull-secrets.yaml
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.imagePullSecrets
+          count: 2
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: global-registry
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: node-registry
+
+  - it: honours extra volume mounts
+    values:
+      - fixtures/extra-volumes.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: scratch
+            mountPath: /scratch
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: scratch
+            hostPath:
+              path: /scratch
+              type: Directory

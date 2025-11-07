@@ -1,0 +1,263 @@
+---
+# Source: klustre-csi-plugin/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "klustre-system"
+  labels:
+    pod-security.kubernetes.io/enforce: "privileged"
+---
+# Source: klustre-csi-plugin/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: klustre-klustre-csi-plugin
+  namespace: "klustre-system"
+  labels:
+    app.kubernetes.io/name: klustre-csi-plugin
+    app.kubernetes.io/instance: klustre
+    app.kubernetes.io/version: "0.1.1"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: klustre-csi-plugin/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: klustre-klustre-csi-plugin-settings
+  namespace: "klustre-system"
+  labels:
+    app.kubernetes.io/name: klustre-csi-plugin
+    app.kubernetes.io/instance: klustre
+    app.kubernetes.io/version: "0.1.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  csiEndpoint: "unix:///var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock"
+  driverRegistrationArg: "--kubelet-registration-path=/var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock"
+  logLevel: "info"
+  nodeImage: "ghcr.io/klustrefs/klustre-csi-plugin:0.1.1"
+  pluginDir: "/var/lib/kubelet/plugins/lustre.csi.klustrefs.io"
+  priorityClassName: "system-node-critical"
+  registrarImage: "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.1"
+  registrationDir: "/var/lib/kubelet/plugins_registry"
+---
+# Source: klustre-csi-plugin/templates/storageclass.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: "klustre-csi-static"
+  labels:
+    app.kubernetes.io/name: klustre-csi-plugin
+    app.kubernetes.io/instance: klustre
+    app.kubernetes.io/version: "0.1.1"
+    app.kubernetes.io/managed-by: Helm
+provisioner: "lustre.csi.klustrefs.io"
+reclaimPolicy: "Retain"
+volumeBindingMode: "WaitForFirstConsumer"
+mountOptions:
+  - flock
+  - user_xattr
+allowedTopologies:
+  - matchLabelExpressions:
+    - key: lustre.csi.klustrefs.io/lustre-client
+      values:
+      - "true"
+---
+# Source: klustre-csi-plugin/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: klustre-klustre-csi-plugin-node
+  labels:
+    app.kubernetes.io/name: klustre-csi-plugin
+    app.kubernetes.io/instance: klustre
+    app.kubernetes.io/version: "0.1.1"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["get", "list", "watch"]
+---
+# Source: klustre-csi-plugin/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: klustre-klustre-csi-plugin-node
+  labels:
+    app.kubernetes.io/name: klustre-csi-plugin
+    app.kubernetes.io/instance: klustre
+    app.kubernetes.io/version: "0.1.1"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: klustre-klustre-csi-plugin-node
+subjects:
+  - kind: ServiceAccount
+    name: klustre-klustre-csi-plugin
+    namespace: "klustre-system"
+---
+# Source: klustre-csi-plugin/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: klustre-klustre-csi-plugin-node
+  namespace: "klustre-system"
+  labels:
+    app.kubernetes.io/name: klustre-csi-plugin
+    app.kubernetes.io/instance: klustre
+    app.kubernetes.io/version: "0.1.1"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: node
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: klustre-csi-plugin
+      app.kubernetes.io/instance: klustre
+      app.kubernetes.io/component: node
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: klustre-csi-plugin
+        app.kubernetes.io/instance: klustre
+        app.kubernetes.io/component: node
+    spec:
+      serviceAccountName: klustre-klustre-csi-plugin
+      priorityClassName: "system-node-critical"
+      hostNetwork: true
+      hostPID: true
+      dnsPolicy: ClusterFirstWithHostNet
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: klustre-csi
+          image: "ghcr.io/klustrefs/klustre-csi-plugin:0.1.1"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --node-id=$(KUBE_NODE_NAME)
+            - --endpoint=$(CSI_ENDPOINT)
+            - --log-level=$(LOG_LEVEL)
+          env:
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: CSI_ENDPOINT
+              value: "unix:///var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: PATH
+              value: "/host/usr/sbin:/host/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            - name: LD_LIBRARY_PATH
+              value: "/host/lib:/host/lib64:/host/usr/lib:/host/usr/lib64"
+          securityContext:
+            allowPrivilegeEscalation: true
+            privileged: true
+            capabilities:
+              add:
+                - SYS_ADMIN
+          livenessProbe:
+            exec:
+              command:
+                - /usr/local/bin/klustrefs-csi-plugin
+                - --help
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            limits:
+              cpu: 200m
+              memory: 200Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: "/var/lib/kubelet/plugins/lustre.csi.klustrefs.io"
+            - name: pods-mount-dir
+              mountPath: "/var/lib/kubelet/pods"
+              mountPropagation: Bidirectional
+            - name: device-dir
+              mountPath: "/dev"
+            - name: host-sbin
+              mountPath: "/sbin"
+              readOnly: true
+            - name: host-usr-sbin
+              mountPath: "/usr/sbin"
+              readOnly: true
+            - name: host-lib
+              mountPath: "/lib"
+              readOnly: true
+            - name: host-lib64
+              mountPath: "/lib64"
+              readOnly: true
+        - name: node-driver-registrar
+          image: "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.1"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --v=2
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock
+          resources:
+            limits:
+              cpu: 200m
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
+      volumes:
+        - name: plugin-dir
+          hostPath:
+            path: "/var/lib/kubelet/plugins/lustre.csi.klustrefs.io"
+            type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: "/var/lib/kubelet/plugins_registry"
+            type: DirectoryOrCreate
+        - name: pods-mount-dir
+          hostPath:
+            path: "/var/lib/kubelet/pods"
+            type: Directory
+        - name: device-dir
+          hostPath:
+            path: "/dev"
+            type: Directory
+        - name: host-sbin
+          hostPath:
+            path: "/sbin"
+            type: Directory
+        - name: host-usr-sbin
+          hostPath:
+            path: "/usr/sbin"
+            type: Directory
+        - name: host-lib
+          hostPath:
+            path: "/lib"
+        - name: host-lib64
+          hostPath:
+            path: "/lib64"
+---
+# Source: klustre-csi-plugin/templates/csidriver.yaml
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: "lustre.csi.klustrefs.io"
+  labels:
+    app.kubernetes.io/name: klustre-csi-plugin
+    app.kubernetes.io/instance: klustre
+    app.kubernetes.io/version: "0.1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  attachRequired: false
+  podInfoOnMount: true
+  volumeLifecycleModes:
+    - Persistent
+  fsGroupPolicy: ReadWriteOnceWithFSType
