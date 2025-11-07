@@ -51,43 +51,38 @@ jobs:
           CALL_VERSION: ${{ inputs.version }}
           CALL_TAG: ${{ inputs.tag }}
         run: |
-          case "$EVENT_NAME" in
-            workflow_dispatch)
-              chart="$INPUT_CHART"
-              raw_version="$INPUT_VERSION"
-              if [ -z "$chart" ] || [ -z "$raw_version" ]; then
-                echo "chart and version inputs are required for workflow_dispatch" >&2
-                exit 1
-              fi
-              version="${raw_version#v}"
-              tag="$chart-$version"
-              ;;
-            release)
-              tag="$RELEASE_TAG"
-              if [[ "$tag" =~ ^([a-zA-Z0-9._-]+)-(v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?)$ ]]; then
-                chart="${BASH_REMATCH[1]}"
-                version="${BASH_REMATCH[2]}"
-                version="${version#v}"
-              else
-                echo "Release tag '$tag' must look like <chart-name>-<semver>" >&2
-                exit 1
-              fi
-              ;;
-            workflow_call)
-              chart="$CALL_CHART"
-              raw_version="$CALL_VERSION"
-              tag="$CALL_TAG"
-              if [ -z "$chart" ] || [ -z "$raw_version" ] || [ -z "$tag" ]; then
-                echo "chart, version, and tag inputs are required for workflow_call" >&2
-                exit 1
-              fi
-              version="${raw_version#v}"
-              ;;
-            *)
-              echo "Unsupported event '$EVENT_NAME'" >&2
+          if [ -n "$CALL_CHART" ] || [ -n "$CALL_VERSION" ] || [ -n "$CALL_TAG" ]; then
+            chart="$CALL_CHART"
+            raw_version="$CALL_VERSION"
+            tag="$CALL_TAG"
+            if [ -z "$chart" ] || [ -z "$raw_version" ] || [ -z "$tag" ]; then
+              echo "chart, version, and tag inputs are required for workflow_call" >&2
               exit 1
-              ;;
-          esac
+            fi
+            version="${raw_version#v}"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            chart="$INPUT_CHART"
+            raw_version="$INPUT_VERSION"
+            if [ -z "$chart" ] || [ -z "$raw_version" ]; then
+              echo "chart and version inputs are required for workflow_dispatch" >&2
+              exit 1
+            fi
+            version="${raw_version#v}"
+            tag="$chart-$version"
+          elif [ "$EVENT_NAME" = "release" ]; then
+            tag="$RELEASE_TAG"
+            if [[ "$tag" =~ ^([a-zA-Z0-9._-]+)-(v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?)$ ]]; then
+              chart="${BASH_REMATCH[1]}"
+              version="${BASH_REMATCH[2]}"
+              version="${version#v}"
+            else
+              echo "Release tag '$tag' must look like <chart-name>-<semver>" >&2
+              exit 1
+            fi
+          else
+            echo "Unsupported event '$EVENT_NAME'" >&2
+            exit 1
+          fi
           echo "chart=$chart" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
