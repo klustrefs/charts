@@ -47,7 +47,7 @@ jobs:
             tag="$chart-$version"
           else
             tag="$RELEASE_TAG"
-            if [[ "$tag" =~ ^([a-zA-Z0-9._-]+)-(v?[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$ ]]; then
+            if [[ "$tag" =~ ^([a-zA-Z0-9._-]+)-(v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?)$ ]]; then
               chart="${BASH_REMATCH[1]}"
               version="${BASH_REMATCH[2]}"
               version="${version#v}"
