@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KlustreFS Helm Charts</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  </head>
+  <body>
+    <div class="theme-toggle">
+      <button id="themeButton" type="button">Toggle Theme</button>
+    </div>
+    <header class="hero">
+      <div class="content">
+        <img class="logo" src="assets/klustre_logo_blue.svg" alt="KlustreFS logo" />
+        <h1>KlustreFS Helm Charts</h1>
+        <p class="lead">
+          OCI-native Helm charts for KlustreFS projects at
+          <code>oci://ghcr.io/klustrefs/charts</code>.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/klustrefs/charts">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
+            </svg>
+            <span>View on GitHub</span>
+          </a>
+          <a class="button" href="https://klustrefs.io/docs">
+            <img class="icon brand-icon" src="assets/klustre_icon_blue.svg" alt="" aria-hidden="true" data-icon-light="assets/klustre_icon_blue.svg" data-icon-dark="assets/klustre_icon_white.svg" />
+            <span>Visit Docs</span>
+          </a>
+          <a class="button" href="#charts">Browse Charts</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel" id="getting-started">
+        <h2>Get Started in Minutes</h2>
+        <ol class="steps">
+          <li>
+            <h3>Authenticate to GHCR</h3>
+            <p>Use a GitHub token or automation credentials.</p>
+            <pre><code class="language-bash">helm registry login ghcr.io -u &lt;github-username&gt;</code></pre>
+          </li>
+          <li>
+            <h3>Pull Charts from the OCI Registry</h3>
+            <pre><code class="language-bash">REGISTRY=oci://ghcr.io/klustrefs/charts
+helm pull "$REGISTRY/&lt;chart-name&gt;" --version &lt;version&gt;</code></pre>
+          </li>
+          <li>
+            <h3>Install</h3>
+            <pre><code class="language-bash">helm install klustre-csi oci://ghcr.io/klustrefs/charts/klustre-csi-plugin \
+  --version 0.1.0 \
+  --namespace klustre-system \
+  --create-namespace</code></pre>
+          </li>
+        </ol>
+      </section>
+
+      <section class="panel" id="charts">
+        <h2>Available Charts</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Chart</th>
+                <th>Description</th>
+                <th>OCI Reference</th>
+                <th>Docs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>klustre-csi-plugin</code></td>
+                <td>Klustre CSI node plugin.</td>
+                <td><code>oci://ghcr.io/klustrefs/charts/klustre-csi-plugin</code></td>
+                <td><a href="https://github.com/klustrefs/charts/tree/main/charts/klustre-csi-plugin">Values</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">More charts are coming soon. Watch the GitHub repository for updates.</p>
+      </section>
+
+      <section class="panel" id="support">
+        <h2>Support &amp; Feedback</h2>
+        <p>
+          File issues or feature requests in the
+          <a href="https://github.com/klustrefs/charts/issues">KlustreFS/charts</a> repository.
+          For community chat, visit <a href="https://klustrefs.io/community">klustrefs.io/community</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>© KlustreFS. Bringing Lustre to Kubernetes.</p>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const root = document.documentElement;
+        const button = document.getElementById('themeButton');
+        const logo = document.querySelector('.logo');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const stored = localStorage.getItem('klustrefs-theme');
+        const initial = stored || (systemPrefersDark ? 'dark' : 'light');
+
+        const brandIcons = document.querySelectorAll('[data-icon-light]');
+
+        const applyTheme = (theme) => {
+          root.setAttribute('data-theme', theme);
+          localStorage.setItem('klustrefs-theme', theme);
+          if (logo) {
+            logo.src = theme === 'dark'
+              ? 'assets/klustre_logo_yellow.svg'
+              : 'assets/klustre_logo_blue.svg';
+          }
+          brandIcons.forEach((icon) => {
+            const lightSrc = icon.getAttribute('data-icon-light');
+            const darkSrc = icon.getAttribute('data-icon-dark');
+            if (lightSrc && darkSrc) {
+              icon.src = theme === 'dark' ? darkSrc : lightSrc;
+            }
+          });
+          if (button) {
+            button.textContent = theme === 'dark' ? 'Switch to Light' : 'Switch to Dark';
+          }
+        };
+
+        applyTheme(initial);
+
+        if (button) {
+          button.addEventListener('click', () => {
+            const current = root.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+          });
+        }
+
+        if (window.hljs) {
+          document.querySelectorAll('pre code').forEach((block) => {
+            window.hljs.highlightElement(block);
+
+            const pre = block.parentElement;
+            if (pre && !pre.classList.contains('has-copy')) {
+              const copyButton = document.createElement('button');
+              copyButton.type = 'button';
+              copyButton.className = 'copy-button';
+              copyButton.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.5 2a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 11.5 2V3H13a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h1.5ZM10 3V2h-4v1h4ZM4 10V3H3v7h1Zm1-6v9h8V4H5Z"></path></svg><span>Copy</span>';
+              copyButton.addEventListener('click', async () => {
+                try {
+                  await navigator.clipboard.writeText(block.innerText.trim());
+                  const original = copyButton.innerHTML;
+                  copyButton.classList.add('success');
+                  copyButton.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.173 13.077 2.4 9.304l1.4-1.4 2.373 2.373 6.026-6.027 1.4 1.414-7.427 7.413Z"></path></svg><span>Copied</span>';
+                  setTimeout(() => {
+                    copyButton.classList.remove('success');
+                    copyButton.innerHTML = original;
+                  }, 1600);
+                } catch (err) {
+                  console.error('Copy failed', err);
+                }
+              });
+              pre.appendChild(copyButton);
+              pre.classList.add('has-copy');
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'charts/**'
+      - 'public/**'
+      - '.github/workflows/ci.yaml'
+      - 'Makefile'
+  workflow_call:
+    inputs:
+      chart:
+        description: 'Limit lint/docs to a single chart (directory name under charts/)'
+        required: false
+        type: string
+
+jobs:
+  lint-and-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Cache Go build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.3
+      - name: Install dependencies
+        run: make deps
+
+      - name: Generate docs
+        run: |
+          if [ -n "${{ inputs.chart }}" ]; then
+            make docs CHART=${{ inputs.chart }}
+          else
+            make docs
+          fi
+
+      - name: Lint charts
+        run: |
+          if [ -n "${{ inputs.chart }}" ]; then
+            make lint CHART=${{ inputs.chart }}
+          else
+            make lint
+          fi
+
+      - name: Check for uncommitted changes
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Repository has uncommitted changes after running make docs/lint. Please commit the generated files."
+            git status
+            exit 1
+          fi

@@ -1,0 +1,109 @@
+name: Publish Helm Charts
+
+on:
+  workflow_dispatch:
+    inputs:
+      chart:
+        description: 'Chart directory name under charts/'
+        required: true
+      version:
+        description: 'Chart version (SemVer)'
+        required: true
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io/klustrefs/charts
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      chart: ${{ steps.resolve.outputs.chart }}
+      version: ${{ steps.resolve.outputs.version }}
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - name: Resolve chart and version
+        id: resolve
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_CHART: ${{ github.event.inputs.chart }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            chart="$INPUT_CHART"
+            version="$INPUT_VERSION"
+            if [ -z "$chart" ] || [ -z "$version" ]; then
+              echo "chart and version inputs are required for workflow_dispatch" >&2
+              exit 1
+            fi
+            tag="$chart-$version"
+          else
+            tag="$RELEASE_TAG"
+            if [[ "$tag" =~ ^([a-zA-Z0-9._-]+)-(v?[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$ ]]; then
+              chart="${BASH_REMATCH[1]}"
+              version="${BASH_REMATCH[2]}"
+              version="${version#v}"
+            else
+              echo "Release tag '$tag' must look like <chart-name>-<semver>" >&2
+              exit 1
+            fi
+          fi
+          echo "chart=$chart" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  ci-checks:
+    needs: prepare
+    uses: ./.github/workflows/ci.yaml
+    secrets: inherit
+    with:
+      chart: ${{ needs.prepare.outputs.chart }}
+
+  publish:
+    needs: [prepare, ci-checks]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.3
+
+      - name: Log in to GHCR
+        env:
+          HELM_EXPERIMENTAL_OCI: 1
+        run: echo "${{ github.token }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Package chart
+        id: package
+        env:
+          CHART_NAME: ${{ needs.prepare.outputs.chart }}
+          EXPECTED_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          chart_dir="charts/${CHART_NAME}"
+          if [ ! -d "$chart_dir" ]; then
+            echo "Chart $chart_dir not found" >&2
+            exit 1
+          fi
+          chart_version=$(awk '/^version:/ {print $2}' "$chart_dir/Chart.yaml")
+          if [ "$chart_version" != "$EXPECTED_VERSION" ]; then
+            echo "Chart version ($chart_version) does not match tag version ($EXPECTED_VERSION)" >&2
+            exit 1
+          fi
+          rm -rf dist
+          mkdir -p dist
+          helm package "$chart_dir" --destination dist
+          echo "CHART_PACKAGE=dist/${CHART_NAME}-${chart_version}.tgz" >> "$GITHUB_ENV"
+
+      - name: Push to OCI registry
+        run: helm push "$CHART_PACKAGE" "oci://${{ env.REGISTRY }}"

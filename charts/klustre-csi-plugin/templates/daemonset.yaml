@@ -1,0 +1,170 @@
+{{- $fullname := include "klustre-csi-plugin.fullname" . -}}
+{{- $namespace := include "klustre-csi-plugin.namespace" . -}}
+{{- $serviceAccount := include "klustre-csi-plugin.serviceAccountName" . -}}
+{{- $pluginTag := .Values.image.tag | default .Chart.AppVersion -}}
+{{- $pluginImage := printf "%s:%s" .Values.image.repository $pluginTag -}}
+{{- $registrarTag := .Values.nodePlugin.registrar.image.tag | default "" -}}
+{{- $registrarImage := ternary (printf "%s:%s" .Values.nodePlugin.registrar.image.repository $registrarTag) .Values.nodePlugin.registrar.image.repository (ne $registrarTag "") -}}
+{{- $pullSecrets := concat (default (list) .Values.imagePullSecrets) (default (list) .Values.nodePlugin.imagePullSecrets) -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ printf "%s-node" $fullname }}
+  namespace: {{ $namespace | quote }}
+  labels:
+    {{- include "klustre-csi-plugin.labels" . | nindent 4 }}
+    app.kubernetes.io/component: node
+spec:
+  selector:
+    matchLabels:
+      {{- include "klustre-csi-plugin.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: node
+  template:
+    metadata:
+      labels:
+        {{- include "klustre-csi-plugin.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: node
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ $serviceAccount }}
+      priorityClassName: {{ .Values.nodePlugin.priorityClassName | quote }}
+      hostNetwork: true
+      hostPID: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if $pullSecrets }}
+      imagePullSecrets:
+        {{- range $name := $pullSecrets }}
+        - name: {{ $name }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: klustre-csi
+          image: {{ $pluginImage | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --node-id=$(KUBE_NODE_NAME)
+            - --endpoint=$(CSI_ENDPOINT)
+            - --log-level=$(LOG_LEVEL)
+          env:
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: CSI_ENDPOINT
+              value: {{ .Values.nodePlugin.csiEndpoint | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.nodePlugin.logLevel | quote }}
+            - name: PATH
+              value: {{ .Values.nodePlugin.pathEnv | quote }}
+            - name: LD_LIBRARY_PATH
+              value: {{ .Values.nodePlugin.ldLibraryPath | quote }}
+          securityContext:
+            allowPrivilegeEscalation: true
+            privileged: true
+            capabilities:
+              add:
+                - SYS_ADMIN
+          livenessProbe:
+            exec:
+              command:
+                - /usr/local/bin/klustrefs-csi-plugin
+                - --help
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            {{- toYaml .Values.nodePlugin.resources | nindent 12 }}
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: {{ .Values.nodePlugin.pluginDir | quote }}
+            - name: pods-mount-dir
+              mountPath: {{ .Values.nodePlugin.hostPaths.pods | quote }}
+              mountPropagation: Bidirectional
+            - name: device-dir
+              mountPath: {{ .Values.nodePlugin.hostPaths.device | quote }}
+            - name: host-sbin
+              mountPath: {{ .Values.nodePlugin.hostPaths.sbin | quote }}
+              readOnly: true
+            - name: host-usr-sbin
+              mountPath: {{ .Values.nodePlugin.hostPaths.usrSbin | quote }}
+              readOnly: true
+            - name: host-lib
+              mountPath: {{ .Values.nodePlugin.hostPaths.lib | quote }}
+              readOnly: true
+            - name: host-lib64
+              mountPath: {{ .Values.nodePlugin.hostPaths.lib64 | quote }}
+              readOnly: true
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        - name: node-driver-registrar
+          image: {{ $registrarImage | quote }}
+          imagePullPolicy: {{ .Values.nodePlugin.registrar.image.pullPolicy }}
+          args:
+            - --v=2
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path={{ .Values.nodePlugin.kubeletRegistrationPath }}
+          resources:
+            {{- toYaml .Values.nodePlugin.registrar.resources | nindent 12 }}
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
+      volumes:
+        - name: plugin-dir
+          hostPath:
+            path: {{ .Values.nodePlugin.pluginDir | quote }}
+            type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: {{ .Values.nodePlugin.registrationDir | quote }}
+            type: DirectoryOrCreate
+        - name: pods-mount-dir
+          hostPath:
+            path: {{ .Values.nodePlugin.hostPaths.pods | quote }}
+            type: Directory
+        - name: device-dir
+          hostPath:
+            path: {{ .Values.nodePlugin.hostPaths.device | quote }}
+            type: Directory
+        - name: host-sbin
+          hostPath:
+            path: {{ .Values.nodePlugin.hostPaths.sbin | quote }}
+            type: Directory
+        - name: host-usr-sbin
+          hostPath:
+            path: {{ .Values.nodePlugin.hostPaths.usrSbin | quote }}
+            type: Directory
+        - name: host-lib
+          hostPath:
+            path: {{ .Values.nodePlugin.hostPaths.lib | quote }}
+        - name: host-lib64
+          hostPath:
+            path: {{ .Values.nodePlugin.hostPaths.lib64 | quote }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}

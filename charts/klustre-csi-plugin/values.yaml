@@ -1,0 +1,126 @@
+# Override default naming behaviour
+nameOverride: ""
+fullnameOverride: ""
+
+# Namespace configuration for the chart's resources
+namespace:
+  # Create the namespace if it does not already exist
+  create: true
+  # Namespace where the chart's resources are installed
+  name: klustre-system
+  labels:
+    # Additional labels applied to the namespace
+    pod-security.kubernetes.io/enforce: privileged
+
+# Container image for the CSI node plugin
+image:
+  repository: ghcr.io/klustrefs/klustre-csi-plugin
+  tag: 0.1.1
+  pullPolicy: IfNotPresent
+
+# Node DaemonSet behaviour and helper images
+nodePlugin:
+  # Level passed to --log-level
+  logLevel: info
+  # Priority class assigned to the DaemonSet pods
+  priorityClassName: system-node-critical
+  # Host path where the CSI Unix socket is created
+  pluginDir: /var/lib/kubelet/plugins/lustre.csi.klustrefs.io
+  # Host path used for node-driver-registrar registration information
+  registrationDir: /var/lib/kubelet/plugins_registry
+  kubeletRegistrationPath: /var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock
+  csiEndpoint: unix:///var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock
+  # PATH/LIB vars injected into the privileged container
+  pathEnv: /host/usr/sbin:/host/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  ldLibraryPath: /host/lib:/host/lib64:/host/usr/lib:/host/usr/lib64
+  imagePullSecrets: []
+  hostPaths:
+    # Additional privileged mounts used by the node plugin
+    pods: /var/lib/kubelet/pods
+    device: /dev
+    sbin: /sbin
+    usrSbin: /usr/sbin
+    lib: /lib
+    lib64: /lib64
+  resources:
+    # Baseline compute/memory reserved for the node plugin container
+    requests:
+      cpu: 50m
+      memory: 50Mi
+    # Hard limits enforced by the scheduler for the node plugin
+    limits:
+      cpu: 200m
+      memory: 200Mi
+  registrar:
+    image:
+      repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
+      tag: v2.10.1
+      pullPolicy: IfNotPresent
+    resources:
+      # Resource requests for the node-driver-registrar sidecar
+      requests:
+        cpu: 100m
+        memory: 200Mi
+      # Scheduler limits for the node-driver-registrar sidecar
+      limits:
+        cpu: 200m
+        memory: 200Mi
+
+# Placement controls for the DaemonSet pod
+tolerations:
+  - operator: Exists
+# Static scheduling preferences (in addition to tolerations)
+nodeSelector: {}
+affinity: {}
+topologySpreadConstraints: []
+podSecurityContext: {}
+securityContext: {}
+# Extra metadata applied to all pods
+podAnnotations: {}
+podLabels: {}
+# Additional image pull secrets applied to the pod spec
+imagePullSecrets: []
+# Extra volumes/mounts appended to the pod spec
+extraVolumes: []
+extraVolumeMounts: []
+
+# Service account and RBAC toggles
+serviceAccount:
+  # Create a dedicated service account
+  create: true
+  # Optional explicit service account name
+  name: ""
+  annotations: {}
+
+rbac:
+  # Toggle creation of ClusterRole/ClusterRoleBinding
+  create: true
+
+# Cluster-wide CSIDriver object
+csiDriver:
+  # Whether to install the CSIDriver resource
+  create: true
+  name: lustre.csi.klustrefs.io
+  fsGroupPolicy: ReadWriteOnceWithFSType
+
+# Optional static storage class example
+storageClass:
+  # Set to false if you only want the DaemonSet components
+  create: true
+  name: klustre-csi-static
+  reclaimPolicy: Retain
+  volumeBindingMode: WaitForFirstConsumer
+  mountOptions:
+    - flock
+    - user_xattr
+  allowedTopologies:
+    - matchLabelExpressions:
+        - key: lustre.csi.klustrefs.io/lustre-client
+          values:
+            - "true"
+  annotations: {}
+  parameters: {}
+
+# Expose operational settings via ConfigMap for operators
+settingsConfigMap:
+  create: true

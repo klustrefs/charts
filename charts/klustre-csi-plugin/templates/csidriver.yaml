@@ -1,0 +1,16 @@
+{{- if .Values.csiDriver.create }}
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: {{ .Values.csiDriver.name | quote }}
+  labels:
+    {{- include "klustre-csi-plugin.labels" . | nindent 4 }}
+spec:
+  attachRequired: false
+  podInfoOnMount: true
+  volumeLifecycleModes:
+    - Persistent
+  {{- with .Values.csiDriver.fsGroupPolicy }}
+  fsGroupPolicy: {{ . }}
+  {{- end }}
+{{- end }}

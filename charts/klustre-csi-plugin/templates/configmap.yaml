@@ -1,0 +1,18 @@
+{{- if .Values.settingsConfigMap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "klustre-csi-plugin.fullname" . }}-settings
+  namespace: {{ include "klustre-csi-plugin.namespace" . | quote }}
+  labels:
+    {{- include "klustre-csi-plugin.labels" . | nindent 4 }}
+data:
+  csiEndpoint: {{ .Values.nodePlugin.csiEndpoint | quote }}
+  driverRegistrationArg: {{ printf "--kubelet-registration-path=%s" .Values.nodePlugin.kubeletRegistrationPath | quote }}
+  logLevel: {{ .Values.nodePlugin.logLevel | quote }}
+  nodeImage: {{ printf "%s:%s" .Values.image.repository .Values.image.tag | quote }}
+  pluginDir: {{ .Values.nodePlugin.pluginDir | quote }}
+  priorityClassName: {{ .Values.nodePlugin.priorityClassName | quote }}
+  registrarImage: {{ printf "%s:%s" .Values.nodePlugin.registrar.image.repository .Values.nodePlugin.registrar.image.tag | quote }}
+  registrationDir: {{ .Values.nodePlugin.registrationDir | quote }}
+{{- end }}

@@ -1,0 +1,17 @@
+apiVersion: v2
+name: klustre-csi-plugin
+description: Deploys the Klustre CSI node plugin for Lustre volumes.
+type: application
+version: 0.1.0
+appVersion: 0.1.1
+home: https://github.com/klustrefs/klustre-csi-plugin
+icon: https://raw.githubusercontent.com/klustrefs/charts/main/public/assets/klustre_icon_black.svg
+sources:
+  - https://github.com/klustrefs/klustre-csi-plugin
+keywords:
+  - csi
+  - kubernetes
+  - storage
+  - lustre
+annotations:
+  artifacthub.io/license: Apache-2.0
