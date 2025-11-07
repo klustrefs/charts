@@ -100,3 +100,12 @@ jobs:
                 throw error;
               }
             }
+
+  publish-chart:
+    needs: [prepare, ci-checks, create-release]
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
+    with:
+      chart: ${{ needs.prepare.outputs.chart }}
+      version: ${{ needs.prepare.outputs.version }}
+      tag: ${{ needs.prepare.outputs.tag }}

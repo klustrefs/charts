@@ -128,9 +128,9 @@ chart-tag-delete:
 	@if [ -z "$(VERSION)" ]; then echo "ERROR: VERSION is required (e.g., VERSION=0.1.0)" >&2; exit 1; fi
 	@TAG_NAME="$(CHART)-$(VERSION)"; \
 	echo "Deleting local tag $${TAG_NAME}"; \
-	- git tag -d "$${TAG_NAME}"; \
+	-git tag -d "$${TAG_NAME}"; \
 	echo "Deleting remote tag $${TAG_NAME}"; \
-	- git push --delete origin "$${TAG_NAME}" || git push origin :refs/tags/"$${TAG_NAME}"
+	-git push --delete origin "$${TAG_NAME}" || git push origin :refs/tags/"$${TAG_NAME}"
 
 chart-tag-repush: chart-tag-delete chart-tag
 	@$(MAKE) chart-tag-push CHART=$(CHART) VERSION=$(VERSION)
