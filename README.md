@@ -1,5 +1,6 @@
 # KlustreFS Helm Charts
 
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/klustre-csi-plugin)](https://artifacthub.io/packages/search?repo=klustre-csi-plugin)
 [![CI](https://github.com/klustrefs/charts/actions/workflows/ci.yaml/badge.svg)](https://github.com/klustrefs/charts/actions/workflows/ci.yaml)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/klustrefs/charts?sort=semver)](https://github.com/klustrefs/charts/releases)
 [![OCI Registry](https://img.shields.io/badge/helm%20oci-ghcr.io%2Fklustrefs%2Fcharts-0F1689?logo=helm&logoColor=white)](https://klustrefs.io/charts/)
