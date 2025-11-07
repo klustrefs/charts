@@ -269,6 +269,7 @@ pre {
   -webkit-overflow-scrolling: touch;
   border: 1px solid rgba(79, 128, 255, 0.12);
   max-width: 100%;
+  padding-top: 1.5rem;
 }
 
 pre code {
@@ -427,7 +428,7 @@ footer {
   }
 
   pre {
-    padding: 0.85rem 0.95rem;
+    padding: 1.3rem 0.95rem 0.9rem;
   }
 
   pre code {
@@ -436,8 +437,9 @@ footer {
   }
 
   .copy-button {
-    top: 0.4rem;
-    right: 0.4rem;
+    top: 0rem;
+    right: 0.5rem;
+    transform: none;
   }
 }
 p a {
