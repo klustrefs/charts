@@ -103,6 +103,8 @@ jobs:
 
   publish-chart:
     needs: [prepare, ci-checks, create-release]
+    permissions:
+      packages: write
     uses: ./.github/workflows/publish.yml
     secrets: inherit
     with:
