@@ -18,20 +18,50 @@ Each chart directory contains its own README and default values. Run `helm show 
 
 ## Quickstart
 
-```bash
-# 1. Authenticate (requires GitHub token with read:packages)
-helm registry login ghcr.io -u <github-username>
+> Prerequisites: Helm 3.8+ (for OCI support) and a GitHub token with the `read:packages` scope.
 
-# 2. Pull a chart
-REGISTRY=oci://ghcr.io/klustrefs/charts
-helm pull "$REGISTRY/<chart-name>" --version <version>
+1. **Log in to GHCR**
 
-# 3. Install the Klustre CSI plugin
-helm install klustre-csi oci://ghcr.io/klustrefs/charts/klustre-csi-plugin \
-  --version 0.1.0 \
-  --namespace klustre-system \
-  --create-namespace
-```
+   ```bash
+   helm registry login ghcr.io -u <github-username>
+   ```
+
+2. **Discover charts & versions**
+   - Browse https://klustrefs.io/charts/ for the current catalog.
+   - Or pull metadata for a specific chart:
+
+     ```bash
+     REGISTRY=oci://ghcr.io/klustrefs/charts
+     helm show chart "$REGISTRY/<chart-name>" --version <version>
+     helm show values "$REGISTRY/<chart-name>" --version <version>
+     ```
+
+3. **Install any chart**
+
+   ```bash
+   helm upgrade --install <release-name> \
+     oci://ghcr.io/klustrefs/charts/<chart-name> \
+     --version <version> \
+     --namespace <namespace> \
+     --create-namespace
+   ```
+
+   Example (Klustre CSI plugin):
+
+   ```bash
+   helm upgrade --install klustre-csi \
+     oci://ghcr.io/klustrefs/charts/klustre-csi-plugin \
+     --version 0.1.0 \
+     --namespace klustre-system \
+     --create-namespace
+   ```
+
+4. **Inspect packaged artifacts (optional)**
+
+   ```bash
+   helm pull "$REGISTRY/<chart-name>" --version <version>
+   tar -tf <chart-name>-<version>.tgz
+   ```
 
 ## Contributing
 

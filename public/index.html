@@ -42,20 +42,34 @@
         <ol class="steps">
           <li>
             <h3>Authenticate to GHCR</h3>
-            <p>Use a GitHub token or automation credentials.</p>
+            <p>Use a GitHub token or automation credentials with <code>read:packages</code>.</p>
             <pre><code class="language-bash">helm registry login ghcr.io -u &lt;github-username&gt;</code></pre>
           </li>
           <li>
-            <h3>Pull Charts from the OCI Registry</h3>
+            <h3>Discover charts &amp; versions</h3>
+            <p>Browse this page or inspect metadata directly.</p>
             <pre><code class="language-bash">REGISTRY=oci://ghcr.io/klustrefs/charts
-helm pull "$REGISTRY/&lt;chart-name&gt;" --version &lt;version&gt;</code></pre>
+helm show chart   "$REGISTRY/&lt;chart-name&gt;" --version &lt;version&gt;
+helm show values  "$REGISTRY/&lt;chart-name&gt;" --version &lt;version&gt;</code></pre>
           </li>
           <li>
-            <h3>Install</h3>
-            <pre><code class="language-bash">helm install klustre-csi oci://ghcr.io/klustrefs/charts/klustre-csi-plugin \
+            <h3>Install any chart</h3>
+            <pre><code class="language-bash">helm upgrade --install &lt;release-name&gt; \
+  "$REGISTRY/&lt;chart-name&gt;" \
+  --version &lt;version&gt; \
+  --namespace &lt;namespace&gt; \
+  --create-namespace</code></pre>
+            <p class="note">Example – Klustre CSI plugin:</p>
+            <pre><code class="language-bash">helm upgrade --install klustre-csi \
+  oci://ghcr.io/klustrefs/charts/klustre-csi-plugin \
   --version 0.1.0 \
   --namespace klustre-system \
   --create-namespace</code></pre>
+          </li>
+          <li>
+            <h3>Inspect tarballs (optional)</h3>
+            <pre><code class="language-bash">helm pull "$REGISTRY/&lt;chart-name&gt;" --version &lt;version&gt;
+tar -tf &lt;chart-name&gt;-&lt;version&gt;.tgz</code></pre>
           </li>
         </ol>
       </section>
