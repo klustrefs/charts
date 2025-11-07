@@ -266,13 +266,17 @@ pre {
   padding: 1rem 1.2rem;
   border-radius: 12px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid rgba(79, 128, 255, 0.12);
+  max-width: 100%;
 }
 
 pre code {
   display: block;
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 3.2vw, 0.95rem);
   line-height: 1.5;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  white-space: pre;
 }
 
 .hljs {
@@ -423,7 +427,17 @@ footer {
   }
 
   pre {
-    font-size: 0.88rem;
+    padding: 0.85rem 0.95rem;
+  }
+
+  pre code {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .copy-button {
+    top: 0.4rem;
+    right: 0.4rem;
   }
 }
 p a {
