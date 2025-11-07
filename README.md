@@ -1,8 +1,9 @@
 # KlustreFS Helm Charts
 
 [![CI](https://github.com/klustrefs/charts/actions/workflows/ci.yaml/badge.svg)](https://github.com/klustrefs/charts/actions/workflows/ci.yaml)
-[![Publish](https://github.com/klustrefs/charts/actions/workflows/publish.yml/badge.svg)](https://github.com/klustrefs/charts/actions/workflows/publish.yml)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/klustrefs/charts?sort=semver)](https://github.com/klustrefs/charts/releases)
+[![OCI Registry](https://img.shields.io/badge/helm%20oci-ghcr.io%2Fklustrefs%2Fcharts-0F1689?logo=helm&logoColor=white)](https://klustrefs.io/charts/)
+[![Docs](https://img.shields.io/badge/docs-klustrefs.io%2Fcharts-1F6FEB?logo=readthedocs&logoColor=white)](https://klustrefs.io/charts/)
 
 Helm charts for the KlustreFS platform. All artifacts are published as OCI packages under `oci://ghcr.io/klustrefs/charts` and surfaced on the static landing page at [klustrefs.io/charts](https://klustrefs.io/charts/) (source in `public/`).
 
