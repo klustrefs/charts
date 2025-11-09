@@ -2,7 +2,9 @@ suite: Namespace
 templates:
   - templates/namespace.yaml
 tests:
-  - it: creates namespace with labels by default
+  - it: creates namespace with labels when enabled
+    set:
+      namespace.create: true
     asserts:
       - equal:
           path: metadata.name
@@ -11,7 +13,12 @@ tests:
           path: metadata.labels["pod-security.kubernetes.io/enforce"]
           value: privileged
 
-  - it: skips namespace when disabled
+  - it: skips namespace by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: skips namespace when explicitly disabled
     set:
       namespace.create: false
     asserts:
