@@ -5,7 +5,7 @@ fullnameOverride: ""
 # Namespace configuration for the chart's resources
 namespace:
   # Create the namespace if it does not already exist
-  create: true
+  create: false
   # Namespace where the chart's resources are installed
   name: klustre-system
   labels:
