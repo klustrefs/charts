@@ -26,7 +26,7 @@ Deploys the Klustre CSI node plugin for Lustre volumes.
 | image.tag | string | `"0.1.1"` |  |
 | imagePullSecrets | list | `[]` |  |
 | nameOverride | string | `""` |  |
-| namespace.create | bool | `true` |  |
+| namespace.create | bool | `false` |  |
 | namespace.labels."pod-security.kubernetes.io/enforce" | string | `"privileged"` |  |
 | namespace.name | string | `"klustre-system"` |  |
 | nodePlugin.csiEndpoint | string | `"unix:///var/lib/kubelet/plugins/lustre.csi.klustrefs.io/csi.sock"` |  |
