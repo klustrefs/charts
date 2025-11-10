@@ -104,18 +104,18 @@ spec:
               mountPath: {{ .Values.nodePlugin.hostPaths.pods | quote }}
               mountPropagation: Bidirectional
             - name: device-dir
-              mountPath: {{ .Values.nodePlugin.hostPaths.device | quote }}
+              mountPath: /host{{ .Values.nodePlugin.hostPaths.device }}
             - name: host-sbin
-              mountPath: {{ .Values.nodePlugin.hostPaths.sbin | quote }}
+              mountPath: /host{{ .Values.nodePlugin.hostPaths.sbin }}
               readOnly: true
             - name: host-usr-sbin
-              mountPath: {{ .Values.nodePlugin.hostPaths.usrSbin | quote }}
+              mountPath: /host{{ .Values.nodePlugin.hostPaths.usrSbin }}
               readOnly: true
             - name: host-lib
-              mountPath: {{ .Values.nodePlugin.hostPaths.lib | quote }}
+              mountPath: /host{{ .Values.nodePlugin.hostPaths.lib }}
               readOnly: true
             - name: host-lib64
-              mountPath: {{ .Values.nodePlugin.hostPaths.lib64 | quote }}
+              mountPath: /host{{ .Values.nodePlugin.hostPaths.lib64 }}
               readOnly: true
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}

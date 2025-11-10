@@ -1,12 +1,4 @@
 ---
-# Source: klustre-csi-plugin/templates/namespace.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: "klustre-system"
-  labels:
-    pod-security.kubernetes.io/enforce: "privileged"
----
 # Source: klustre-csi-plugin/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -181,18 +173,18 @@ spec:
               mountPath: "/var/lib/kubelet/pods"
               mountPropagation: Bidirectional
             - name: device-dir
-              mountPath: "/dev"
+              mountPath: /host/dev
             - name: host-sbin
-              mountPath: "/sbin"
+              mountPath: /host/sbin
               readOnly: true
             - name: host-usr-sbin
-              mountPath: "/usr/sbin"
+              mountPath: /host/usr/sbin
               readOnly: true
             - name: host-lib
-              mountPath: "/lib"
+              mountPath: /host/lib
               readOnly: true
             - name: host-lib64
-              mountPath: "/lib64"
+              mountPath: /host/lib64
               readOnly: true
         - name: node-driver-registrar
           image: "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.1"

@@ -13,7 +13,7 @@ Helm charts for the KlustreFS platform. All artifacts are published as OCI packa
 <!-- charts-table:start -->
 | Chart | Path | Chart Version | App Version | OCI Reference |
 |-------|------|---------------|-------------|---------------|
-| klustre-csi-plugin | [`klustre-csi-plugin`](charts/klustre-csi-plugin) | `0.1.0` | `0.1.1` | `oci://ghcr.io/klustrefs/charts/klustre-csi-plugin` |
+| klustre-csi-plugin | [`klustre-csi-plugin`](charts/klustre-csi-plugin) | `0.1.1` | `0.1.1` | `oci://ghcr.io/klustrefs/charts/klustre-csi-plugin` |
 <!-- charts-table:end -->
 
 Each chart directory contains its own README and default values. Run `helm show all oci://ghcr.io/klustrefs/charts/<chart>` for published metadata.

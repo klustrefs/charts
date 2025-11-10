@@ -2,7 +2,7 @@ apiVersion: v2
 name: klustre-csi-plugin
 description: Deploys the Klustre CSI node plugin for Lustre volumes.
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: 0.1.1
 home: https://github.com/klustrefs/klustre-csi-plugin
 icon: https://raw.githubusercontent.com/klustrefs/charts/main/public/assets/klustre_icon_black.svg

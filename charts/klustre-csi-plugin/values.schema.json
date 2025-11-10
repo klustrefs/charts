@@ -121,7 +121,7 @@
       "description": "Namespace configuration for the chart's resources",
       "properties": {
         "create": {
-          "default": true,
+          "default": false,
           "description": "Create the namespace if it does not already exist",
           "required": [],
           "title": "create",
